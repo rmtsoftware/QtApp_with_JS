@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      content="width=device-width, initial-scale=1, minimum-scale=1"
+      name="viewport"
+    />
+    <script
+      src="https://api-maps.yandex.ru/v3/?apikey=596a96c3-6bb5-434e-9252-e76cd6d76035&lang=ru_RU"
+      type="text/javascript"
+    ></script>
+    <script>
+      const LOCATION = { center: [37.64, 55.76], zoom: 3 }
+      window.map = null
+
+      main()
+
+      function icon(props) {
+        const circle = document.createElement("div")
+        circle.classList.add("icon")
+        circle.style.color = props.color
+        circle.style.backgroundImage = `url(${props.icon})`
+        circle.style.setProperty("--size", props.size)
+
+        if (props.title) {
+          const title = document.createElement("div")
+          title.innerHTML = props.title
+          title.className = "icon-title"
+          circle.appendChild(title)
+        }
+
+        return circle
+      }
+
+      async function main() {
+        await ymaps3.ready
+        const {
+          YMap,
+          YMapDefaultSchemeLayer,
+          YMapDefaultFeaturesLayer,
+          YMapFeature,
+          YMapListener,
+        } = ymaps3
+
+        const { YMapDefaultMarker } = await ymaps3.import(
+          "@yandex/ymaps3-markers@0.0.1"
+        )
+        let lastPoint
+        map = new YMap(document.getElementById("app"), { location: LOCATION })
+        map.addChild((scheme = new YMapDefaultSchemeLayer()))
+        map.addChild(new YMapDefaultFeaturesLayer({ id: "features" }))
+        const clickHandler = (object, event) => {
+          map.addChild(
+            new YMapDefaultMarker({
+              coordinates: event.coordinates,
+            })
+          )
+          console.log("coordinates: " + event.coordinates)
+          if (lastPoint) {
+            const polyline = {
+              geometry: {
+                type: "LineString",
+                coordinates: [
+                  [lastPoint[0], lastPoint[1]],
+                  [event.coordinates[0], event.coordinates[1]],
+                ],
+              },
+              style: { stroke: [{ color: "#F00", width: 1 }] },
+            }
+            map.addChild(new YMapFeature(polyline))
+          }
+          lastPoint = event.coordinates
+        }
+
+        const mapListener = new YMapListener({
+          layer: "any",
+          onClick: clickHandler,
+        })
+        map.addChild(mapListener)
+      }
+    </script>
+    <style>
+      html,
+      body,
+      #app {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: "Yandex Sans Text", Arial, Helvetica, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+</html>
