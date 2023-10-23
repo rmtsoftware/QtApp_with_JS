@@ -1,9 +1,7 @@
 from PySide6 import QtWidgets
-from PySide6.QtGui import QMouseEvent
 from base_ui import Ui_MainWindow
-from PySide6.QtCore import Qt, Signal, QObject, QRunnable, QTimer
+from PySide6.QtCore import QTimer
 import sys
-import time
 
 from PySide6.QtWebEngineCore import QWebEnginePage
 from estimator import Estimator
@@ -22,8 +20,6 @@ class WebEnginePage(QWebEnginePage):
         self._data.append(message)
         return super().javaScriptConsoleMessage(level, message, lineNumber, sourceID)
     
-    #def __str__(self):
-    #    return 'hello from page'
     
     def __getitem__(self, i: int): 
         try:
@@ -33,7 +29,6 @@ class WebEnginePage(QWebEnginePage):
         return item
     
     def __len__(self):
-        #print(f'Длина исходного листа {len(self._data)}')
         return len(self._data) - 1
     
     def __iter__(self):
